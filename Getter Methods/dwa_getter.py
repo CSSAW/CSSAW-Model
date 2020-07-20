@@ -13,8 +13,8 @@ def get_monthly_dwa_data(startDate, endDate, sess, station):
          + " WHERE station = '" + station + "'" \
          + " AND `date` >= " + startDate \
          + " AND `date` <= " + endDate 
-    sqlFile.write(query);
-    sqlFile.close();
+    sqlFile.write(query)
+    sqlFile.close()
     return sess.execute_SQL('temporaryQuery.sql')
 
 
