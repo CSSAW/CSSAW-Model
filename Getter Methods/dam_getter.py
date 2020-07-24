@@ -27,6 +27,7 @@ def get_dam_levels(startDate, endDate, session, province, river):
 
     table = "Norm" + province + "Dams"
 
-    query = "SELECT * FROM CENTRAL." + table + " WHERE River = '" + river + "' AND Date >= " + startDate + " AND Date <= " + endDate
+    query = "SELECT Date, Dam, River, FSC, This_Week, Last_Week, Last_Year FROM CENTRAL." + table + \
+    " WHERE River = '" + river + "' AND Date >= " + startDate + " AND Date <= " + endDate
 
     return session.execute_query(query, pandas=True) 
