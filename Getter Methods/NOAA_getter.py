@@ -2,7 +2,7 @@ import pandas as pd
 from cssaw_central.Session import Session
 
 
-def get_monthly_dwa_data(startDate, endDate, sess, station):
+def get_monthly_dwa_data(startDate, endDate, sess, station=None):
     """ Returns a pandas df with monthly dwa data
         args:
             startDate ---- a string in the YYYYMMDD format for the start of the desired data
@@ -10,17 +10,13 @@ def get_monthly_dwa_data(startDate, endDate, sess, station):
             sess ---- a cssaw-central session used to query the database
             station ---- a string representing the desired station. ex: 'A2H056'
     """
-    tableName = 'dwa_preprocessed'
+    tableName = 'NOAA_monthly'
     query = "SELECT * from CENTRAL." + tableName \
-            + " WHERE station = '" + station + "'" \
-            + " AND `date` >= " + startDate \
-            + " AND `date` <= " + endDate
+          + " WHERE DATE >= " + startDate \
+          + " AND DATE <= " + endDate
+    if station is not None: query += " AND STATION = '" + station + "'"
     dataFrame = sess.execute_query(query, pandas=True)
-    dataFrame = dataFrame.drop("TIME", axis='columns')
-    dataFrame = dataFrame.drop("QUA", axis='columns')
-    dataFrame = dataFrame.drop("QUA.1", axis='columns')
     dataFrame = dataFrame.drop("id", axis='columns')
-    dataFrame = dataFrame.drop("Unnamed: 0", axis='columns')
 
     # The line below gets rid of the Day portion of the Date column,
     # it is used in the groupby to return monthly data.
@@ -40,9 +36,9 @@ if __name__ == "__main__":
     sess = Session(username, password, host, db='CENTRAL')
 
     startDate = '19800000'
-    endDate = '19850000'
+    endDate = '20210000'
 
-    testDf = get_monthly_dwa_data(startDate, endDate, sess, 'A2H056')
+    testDf = get_monthly_dwa_data(startDate, endDate, sess, None)
 
     print(testDf.head())
     pass
