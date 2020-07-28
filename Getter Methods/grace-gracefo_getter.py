@@ -12,7 +12,7 @@ def get_lwe_byRange(startDate, endDate, session, bbox = None):
   within the specified range
   '''
 
-  table = "lwe_data"
+  table = "lwe"
   query = "SELECT * FROM CENTRAL." + table \
           + " WHERE 'Date' >= " + startDate \
           + " AND 'Date' <= " + endDate
