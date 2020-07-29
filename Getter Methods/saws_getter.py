@@ -56,6 +56,14 @@ def get_monthly_saws_data(startDate, endDate, sess):
     currentMonth = int(startMonth)
     currentYear = int(startYear)
 
+    currentDate = "{}-1-{}".format(currentMonth, currentYear)
+    query = "SELECT * from CENTRAL.saws_precipitation" + " WHERE `Date` LIKE '" + currentDate + "'"
+    dataFrame = sess.execute_query(query, pandas=True)
+    currentMonth += 1
+    if currentMonth > 12:
+        currentMonth = 1
+        currentYear += 1
+
     while currentMonth != int(endMonth) and currentYear != endYear:
         currentDate = "{}-1-{}".format(currentMonth, currentYear)
         query = "SELECT * from CENTRAL.saws_precipitation" + " WHERE `Date` LIKE '" + currentDate + "'"
@@ -64,14 +72,12 @@ def get_monthly_saws_data(startDate, endDate, sess):
         if currentMonth > 12:
             currentMonth = 1
             currentYear += 1
-        # if dataFrame.empty:
-        #     dataFrame = sess.execute_query(query, pandas=True)
-        # else:
-        dataFrame.add(sess.execute_query(query, pandas=True))
+ 
+        dataFrame = dataFrame.append(sess.execute_query(query, pandas=True), ignore_index=True)
 
     currentDate = "{}-1-{}".format(currentMonth, currentYear)
     query = "SELECT * from CENTRAL.saws_precipitation" + " WHERE `Date` LIKE '" + currentDate + "'"
-    dataFrame.add(sess.execute_query(query, pandas=True))
+    dataFrame = dataFrame.append(pd.DataFrame(sess.execute_query(query, pandas=True)), ignore_index=True)
 
     # The line below gets rid of the Day portion of the Date column,
     # it is used in the groupby to return monthly data. 
@@ -90,9 +96,14 @@ if __name__ == "__main__":
     sess = Session(username,password, host, db='CENTRAL')
 
     startDate = '20120310'
-    endDate = '20120711'
+    endDate = '20120511'
    
     testDf = get_monthly_saws_data(startDate,endDate, sess)
     
     print(testDf.head())
+    print(testDf.size)
+    print(testDf.loc[[370]])
+    print(testDf.loc[[900]])
+    
+    testDf.to_json (r'.\df.json')
     pass
