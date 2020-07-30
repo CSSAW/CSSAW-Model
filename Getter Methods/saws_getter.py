@@ -1,22 +1,30 @@
 import pandas as pd
 from cssaw_central.Session import Session
 
-def getQueriesInRange(startMonth, startYear, endMonth, endYear):
-    currentMonth = int(startMonth)
-    currentYear = int(startYear)
+# def getQueriesInRange(startMonth, startYear, endMonth, endYear):
+#     currentMonth = int(startMonth)
+#     currentYear = int(startYear)
 
-    queries = []
-    while currentMonth != int(endMonth) and currentYear != endYear:
-        currentDate = "{}-1-{}".format(currentMonth, currentYear)
-        queries.append("SELECT * from CENTRAL.saws_precipitation" + " WHERE `Date` LIKE '" + currentDate + "'")
-        currentMonth += 1
-        if currentMonth > 12:
-            currentMonth = 1
-            currentYear += 1
-    currentDate = "{}-1-{}".format(currentMonth, currentYear)
-    queries.append("SELECT * from CENTRAL.saws_precipitation" + " WHERE `Date` LIKE '" + currentDate + "'")
+#     queries = []
+#     while currentMonth != int(endMonth) and currentYear != endYear:
+#         currentDate = "{}-1-{}".format(currentMonth, currentYear)
+#         queries.append("SELECT * from CENTRAL.saws_precipitation" + " WHERE `Date` LIKE '" + currentDate + "'")
+#         currentMonth += 1
+#         if currentMonth > 12:
+#             currentMonth = 1
+#             currentYear += 1
+#     currentDate = "{}-1-{}".format(currentMonth, currentYear)
+#     queries.append("SELECT * from CENTRAL.saws_precipitation" + " WHERE `Date` LIKE '" + currentDate + "'")
     
-    return queries
+#     return queries
+
+def reformatDate(date):
+    month = date[0:date.index("-")]
+    year = date[-4:]
+    if len(month) == 1:
+        month = "0{}".format(month)
+    
+    return "{}{}".format(year, month)
 
 def get_monthly_saws_data(startDate, endDate, sess):
     """ Returns a pandas df with monthly saws data
@@ -38,18 +46,6 @@ def get_monthly_saws_data(startDate, endDate, sess):
         endDay = endDay[1:]
     if endMonth[0] == '0':
         endMonth = endMonth[1:]
-
-    queries = getQueriesInRange(startMonth, startYear, endMonth, endYear)
-    print(queries)
-
-    # format the date to match the dates in the database, fixing a 1 in for day since model is using months for data anyways
-    # startDate = "{}-1-{}".format(startMonth, startYear)
-    # endDate = "{}-1-{}".format(endMonth, endYear)
-    # # print(startDate, endDate)
-    # tableName = 'saws_precipitation'
-    # query = "SELECT * from CENTRAL." + tableName \
-    #      + " WHERE `Date` LIKE '" + startDate + "'" 
-    #      #+ " AND `Date` <= " + endDate 
 
     dataFrame = pd.DataFrame()
 
@@ -80,7 +76,8 @@ def get_monthly_saws_data(startDate, endDate, sess):
     dataFrame = dataFrame.append(pd.DataFrame(sess.execute_query(query, pandas=True)), ignore_index=True)
 
     # The line below gets rid of the Day portion of the Date column,
-    # it is used in the groupby to return monthly data. 
+    # it is used in the groupby to return monthly data.
+    dataFrame["Date"] = dataFrame["Date"].apply(reformatDate) 
     # dataFrame["DATE"] = dataFrame["DATE"].apply(lambda x: "{}{}".format(x[-4:], x[4:-5]))
     # dataFrame = dataFrame.groupby("DATE").mean()
 
@@ -95,15 +92,13 @@ if __name__ == "__main__":
     
     sess = Session(username,password, host, db='CENTRAL')
 
+    # NOTE: saws data starts Jan 1 2012 and is current up to the last full month (June 30 2020 as of right now)
     startDate = '20120310'
     endDate = '20120511'
    
     testDf = get_monthly_saws_data(startDate,endDate, sess)
     
     print(testDf.head())
-    print(testDf.size)
-    print(testDf.loc[[370]])
-    print(testDf.loc[[900]])
     
     testDf.to_json (r'.\df.json')
     pass
