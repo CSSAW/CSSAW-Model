@@ -62,11 +62,13 @@ def get_monthly_saws_data(startDate, endDate, sess):
         # get data by date from the database through a query and append results to the dataframe
         dataFrame = dataFrame.append(sess.execute_query(query, pandas=True), ignore_index=True)
 
-    # handle the end month, year here
-    currentDate = "{}-1-{}".format(currentMonth, currentYear)
-    query = "SELECT * from CENTRAL.saws_precipitation" + " WHERE `Date` LIKE '" + currentDate + "'"
-    # get data by date from the database and append to the dataframe
-    dataFrame = dataFrame.append(pd.DataFrame(sess.execute_query(query, pandas=True)), ignore_index=True)
+    # make sure that the start date and end date are not within the same month and year
+    if startMonth != endMonth or startYear != endYear:
+        # handle the end month, year here
+        currentDate = "{}-1-{}".format(currentMonth, currentYear)
+        query = "SELECT * from CENTRAL.saws_precipitation" + " WHERE `Date` LIKE '" + currentDate + "'"
+        # get data by date from the database and append to the dataframe
+        dataFrame = dataFrame.append(pd.DataFrame(sess.execute_query(query, pandas=True)), ignore_index=True)
 
     # The line below gets rid of the Day portion of the Date column
     dataFrame["Date"] = dataFrame["Date"].apply(reformatDate) 
