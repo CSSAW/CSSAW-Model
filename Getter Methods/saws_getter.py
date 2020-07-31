@@ -1,23 +1,8 @@
 import pandas as pd
 from cssaw_central.Session import Session
 
-# def getQueriesInRange(startMonth, startYear, endMonth, endYear):
-#     currentMonth = int(startMonth)
-#     currentYear = int(startYear)
 
-#     queries = []
-#     while currentMonth != int(endMonth) and currentYear != endYear:
-#         currentDate = "{}-1-{}".format(currentMonth, currentYear)
-#         queries.append("SELECT * from CENTRAL.saws_precipitation" + " WHERE `Date` LIKE '" + currentDate + "'")
-#         currentMonth += 1
-#         if currentMonth > 12:
-#             currentMonth = 1
-#             currentYear += 1
-#     currentDate = "{}-1-{}".format(currentMonth, currentYear)
-#     queries.append("SELECT * from CENTRAL.saws_precipitation" + " WHERE `Date` LIKE '" + currentDate + "'")
-    
-#     return queries
-
+# method that takes a date in as an argument and reformats it to remove the day
 def reformatDate(date):
     month = date[0:date.index("-")]
     year = date[-4:]
@@ -47,39 +32,45 @@ def get_monthly_saws_data(startDate, endDate, sess):
     if endMonth[0] == '0':
         endMonth = endMonth[1:]
 
-    dataFrame = pd.DataFrame()
-
+    # parse the current month and year to be the starting month and year as integers
     currentMonth = int(startMonth)
     currentYear = int(startYear)
 
+    # get the dataframe for the starting month and year
     currentDate = "{}-1-{}".format(currentMonth, currentYear)
     query = "SELECT * from CENTRAL.saws_precipitation" + " WHERE `Date` LIKE '" + currentDate + "'"
+    # get data by date from the database through a query and set dataframe = to the results
     dataFrame = sess.execute_query(query, pandas=True)
+
+    # increment currentMonth and make sure it stays in range of 12 months, incrementing the year after 12 months
     currentMonth += 1
     if currentMonth > 12:
         currentMonth = 1
         currentYear += 1
 
+    # loop through all the months and years until you reach the end month and year
     while currentMonth != int(endMonth) and currentYear != endYear:
         currentDate = "{}-1-{}".format(currentMonth, currentYear)
         query = "SELECT * from CENTRAL.saws_precipitation" + " WHERE `Date` LIKE '" + currentDate + "'"
 
+        # increment currentMonth and make sure it stays in range of 12 months, incrementing the year after 12 months
         currentMonth += 1
         if currentMonth > 12:
             currentMonth = 1
             currentYear += 1
- 
+
+        # get data by date from the database through a query and append results to the dataframe
         dataFrame = dataFrame.append(sess.execute_query(query, pandas=True), ignore_index=True)
 
+    # handle the end month, year here
     currentDate = "{}-1-{}".format(currentMonth, currentYear)
     query = "SELECT * from CENTRAL.saws_precipitation" + " WHERE `Date` LIKE '" + currentDate + "'"
+    # get data by date from the database and append to the dataframe
     dataFrame = dataFrame.append(pd.DataFrame(sess.execute_query(query, pandas=True)), ignore_index=True)
 
-    # The line below gets rid of the Day portion of the Date column,
-    # it is used in the groupby to return monthly data.
+    # The line below gets rid of the Day portion of the Date column
     dataFrame["Date"] = dataFrame["Date"].apply(reformatDate) 
-    # dataFrame["DATE"] = dataFrame["DATE"].apply(lambda x: "{}{}".format(x[-4:], x[4:-5]))
-    # dataFrame = dataFrame.groupby("DATE").mean()
+
 
     return dataFrame
 
@@ -100,5 +91,3 @@ if __name__ == "__main__":
     
     print(testDf.head())
     
-    testDf.to_json (r'.\df.json')
-    pass
