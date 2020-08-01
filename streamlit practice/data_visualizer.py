@@ -1,6 +1,18 @@
+import streamlit as st
+import numpy as np
 import pandas as pd
 from cssaw_central.Session import Session
+import time
+import sys
 
+# get credentials via reading a text file
+credentials = open('../credentials.txt', 'r')
+username = credentials.readline().replace('\n','')
+password = credentials.readline().replace('\n','')
+host = credentials.readline().replace('\n','')
+credentials.close()
+# use credentials to start a session
+sess = Session(username,password, host, db='CENTRAL')
 
 # method that takes a date in as an argument and reformats it to remove the day
 def reformatDate(date):
@@ -11,7 +23,8 @@ def reformatDate(date):
     
     return "{}{}".format(year, month)
 
-def get_monthly_saws_data(startDate, endDate, sess):
+@st.cache
+def get_monthly_saws_data(startDate, endDate):
     """ Returns a pandas df with monthly saws data
         args:
             startDate ---- a string in the YYYYMMDD format for the start of the desired data
@@ -76,20 +89,50 @@ def get_monthly_saws_data(startDate, endDate, sess):
 
     return dataFrame
 
-if __name__ == "__main__":
-    credentials = open('../credentials.txt', 'r')
-    username = credentials.readline().replace('\n','')
-    password = credentials.readline().replace('\n','')
-    host = credentials.readline().replace('\n','')
-    credentials.close()
-    
-    sess = Session(username,password, host, db='CENTRAL')
+# cache this really slow function to speedup runtime on method calls with same arguments 
+@st.cache
+def slowFunction(arg1, arg2, arg3):
+   time.sleep(10)
+   return int(arg1) * int(arg2) * int(arg3)
 
-    # NOTE: saws data starts Jan 1 2012 and is current up to the last full month (June 30 2020 as of right now)
-    startDate = '20120310'
-    endDate = '20120511'
-   
-    testDf = get_monthly_saws_data(startDate,endDate, sess)
+
+if __name__ == "__main__":
+    st.title('Data Visualization')
+
+    st.write("Use the side bar to select different dates")
+
+    months = {
+        "January": "01",
+        "Febrauary": "02",
+        "March": "03",
+        "April": "04",
+        "May": "05",
+        "June": "06",
+        "July": "07",
+        "August": "08",
+        "September": "09",
+        "October": "10",
+        "November": "11",
+        "December": "12"
+    }
+    years = ["2012", "2013", "2014", "2015", "2016", "2017", "2018", "2019", "2020"]
+
+    month = st.sidebar.selectbox("Pick a month", list(months.keys()))
+    year = st.sidebar.selectbox("Pick a year:", years)
+
+    "You selected: ", month, year
+
+    startDate = "{}{}01".format(year, months[month])
+    # use 1 month for testing
+    endDate = startDate
+
+    # use getter method to get data from database for selected date
+    df = get_monthly_saws_data(startDate,endDate)
     
-    print(testDf.head())
-    
+    # df = pd.DataFrame({
+    # 'Date': ['3-1-2012', '3-1-2012', '3-1-2012', '3-1-2012'],
+    # 'Latitude': [25.32, 25.36, 25.32, 25.36],
+    # 'Longitude': [27.3, 27.3, 28.1, 28.1],
+    # 'Precipitation': [0.002, 0.32, 0.091, 0.672]
+    # })
+    st.write(df.head())
