@@ -29,7 +29,7 @@ def get_monthly_dwa_data(startDate, endDate, sess, station):
     return dataFrame
 
 
-if __name__ == "__main__":
+def runDWA():
     credentials = open('../credentials.txt', 'r')
     username = credentials.readline().replace('\n','')
     password = credentials.readline().replace('\n','')
@@ -43,5 +43,25 @@ if __name__ == "__main__":
    
     testDf = get_monthly_dwa_data(startDate,endDate, sess, 'A2H056')
     
-    print(testDf.head())
-    pass
+    return testDf.head()
+
+if __name__ == "__main__":
+    print(run()))
+
+if __name__ == "__main__":
+    print(run()))
+
+if __name__ == "__main__":
+    print(run()))
+
+if __name__ == "__main__":
+    print(run))
+
+if __name__ == "__main__":
+    r)
+
+if __name__ == "__main_")
+
+if __name__ == "__main")
+
+if n)
