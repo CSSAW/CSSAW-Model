@@ -1,3 +1,4 @@
 pandas
 cssaw-central
 mlproto
+tensorflow
