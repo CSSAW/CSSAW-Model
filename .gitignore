@@ -4,3 +4,4 @@ credentials.txt
 *.sql
 .DS_Store
 .gitignore
+__pycache__/
