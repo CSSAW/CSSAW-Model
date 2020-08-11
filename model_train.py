@@ -1,5 +1,6 @@
 from MLProto.MLProto.Proto import Proto
 import data_pull as dp
+import argparse
 
 import json
 import itertools
@@ -50,3 +51,6 @@ def train():
         print('FINISHED ' + model.identifier)
 
     print('BEST MODEL: ' + metrics[min(metrics.keys())] + '\n')
+
+if __name__ == '__main__':
+    train()
