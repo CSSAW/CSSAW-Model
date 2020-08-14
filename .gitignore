@@ -5,3 +5,4 @@ credentials.txt
 .DS_Store
 .gitignore
 __pycache__/
+Documentation/geojson_layer.html
