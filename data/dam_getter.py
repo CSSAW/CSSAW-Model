@@ -1,39 +1,19 @@
 import pandas as pd
 from cssaw_central.Session import Session
 
-def get_dam_levels(startDate, endDate, session, river, province=None):
-    # lookup table of provinces
-    # NOTE: it is not recommended to get specific province data since each province's data is not normalized across all provinces
-    # this is only here for legacy purposes
-    provinces = {"EC":"EasternCape",
-                "FS":"FreeState",
-                "G":"Gauteng",
-                "KN":"KwaZuluNatal",
-                "LP":"Limpopo",
-                "M":"Mpumalanga",
-                "NC":"NorthernCape",
-                "NW":"NorthWest",
-                "WC":"WesternCape"}
-
-    # check that the province exists in the dictionary
-    if province != None and provinces.get(province) == None and province not in provinces.values():
-        raise ValueError("Invalid province argument")
-
-    # changes the province to its full name if it is not already
-    if province != None and provinces.get(province) != None:
-        province = provinces[province]
-
-    # makes sure that the river ends with river
+def get_dam_levels_river(startDate, endDate, session, river):
+    # make sure that the river ends with river
     if not river.endswith(" River"):
         river = river + " River"
 
-    query = "SELECT Date, Dam, River, FSC, This_Week, Last_Week, Last_Year FROM CENTRAL."
+    query = "SELECT * FROM CENTRAL.NormAllDams WHERE River = '" + river
+    query = query + "' AND Date >= " + str(startDate) + " AND Date <= " + str(endDate)
 
-    if province != None:
-        table = "Norm" + province + "Dams"
+    return session.execute_query(query, pandas=True) 
 
-        query = query + table + " WHERE River = '" + river + "' AND Date >= " + startDate + " AND Date <= " + endDate
-    else:
-        query = query + "NormAllDams WHERE River = '" + river + "' AND Date >= " + startDate + " AND Date <= " + endDate
+def get_dam_levels_coords(startDate, endDate, session, lat1, lat2, lon1, lon2):
+    # return dam levels such that each entry's location is lat1 <= x <= lat2 and lon1 <= x <= lon2
+    query = "SELECT * FROM CENTRAL.NormAllDams WHERE Date >= " + str(startDate) + " AND Date <= " + str(endDate)
+    query = query + " AND Latitude >= " + str(lat1) + " AND Latitude <= " + str(lat2) + " AND Longitude >= " + str(lon1) + " AND Longitude <= " + str(lon2)
 
     return session.execute_query(query, pandas=True) 
