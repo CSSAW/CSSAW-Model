@@ -2,10 +2,6 @@ import pandas as pd
 from cssaw_central.Session import Session
 
 def get_dam_levels_river(startDate, endDate, session, river):
-    # make sure that the river ends with river
-    if not river.endswith(" River"):
-        river = river + " River"
-
     query = "SELECT * FROM CENTRAL.NormAllDams WHERE River = '" + river
     query = query + "' AND Date >= " + str(startDate) + " AND Date <= " + str(endDate)
 
