@@ -30,7 +30,7 @@ def get_monthly_dwa_data(startDate, endDate, sess, station):
 
 
 def runDWA():
-    credentials = open('../credentials.txt', 'r')
+    credentials = open('credentials.txt', 'r')
     username = credentials.readline().replace('\n','')
     password = credentials.readline().replace('\n','')
     host = credentials.readline().replace('\n','')
@@ -42,26 +42,8 @@ def runDWA():
     endDate = '19850000'
    
     testDf = get_monthly_dwa_data(startDate,endDate, sess, 'A2H056')
-    
-    return testDf.head()
+    print("DONE")
+    return testDf
 
 if __name__ == "__main__":
-    print(run()))
-
-if __name__ == "__main__":
-    print(run()))
-
-if __name__ == "__main__":
-    print(run()))
-
-if __name__ == "__main__":
-    print(run))
-
-if __name__ == "__main__":
-    r)
-
-if __name__ == "__main_")
-
-if __name__ == "__main")
-
-if n)
+    print(runDWA())

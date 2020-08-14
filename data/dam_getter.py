@@ -1,7 +1,7 @@
 import pandas as pd
 from cssaw_central.Session import Session
 
-def get_dam_levels(startDate, endDate, session, river, province=None):
+def get_dam_levels(startDate, endDate, session, river=None, province=None):
     # lookup table of provinces
     # NOTE: it is not recommended to get specific province data since each province's data is not normalized across all provinces
     # this is only here for legacy purposes
@@ -24,16 +24,22 @@ def get_dam_levels(startDate, endDate, session, river, province=None):
         province = provinces[province]
 
     # makes sure that the river ends with river
-    if not river.endswith(" River"):
+    if river != None and not river.endswith(" River"):
         river = river + " River"
 
-    query = "SELECT Date, Dam, River, FSC, This_Week, Last_Week, Last_Year FROM CENTRAL."
+    query = "SELECT * FROM CENTRAL."
 
     if province != None:
         table = "Norm" + province + "Dams"
 
-        query = query + table + " WHERE River = '" + river + "' AND Date >= " + startDate + " AND Date <= " + endDate
+        if river != None:
+            query = query + table + " WHERE River = '" + river + "' AND Date >= " + startDate + " AND Date <= " + endDate
+        else:
+            query = query + table + " WHERE Date >= " + startDate + " AND Date <= " + endDate
     else:
-        query = query + "NormAllDams WHERE River = '" + river + "' AND Date >= " + startDate + " AND Date <= " + endDate
+        if river != None:
+            query = query + "NormAllDams WHERE River = '" + river + "' AND Date >= " + startDate + " AND Date <= " + endDate
+        else:
+            query = query + "NormAllDams WHERE Date >= " + startDate + " AND Date <= " + endDate
 
     return session.execute_query(query, pandas=True) 

@@ -27,9 +27,8 @@ def get_lwe_byRange(startDate, endDate, session, bbox = None):
   return dataframe
 
 
-if __name__ == "__main__":
+def runGRACE():
   credential = open("credentials.txt", "r").readlines()
-  print(credential)
   userName = credential[0].replace("\n", "")
   passWord = credential[1].replace("\n", "")
   host = credential[2].replace("\n", "")
@@ -38,8 +37,12 @@ if __name__ == "__main__":
     session = Session(userName, passWord, host, db = "CENTRAL")
     print("Database connection successful")
   except:
-    print("Connection error")
+    print("GRACE Connection error")
   
   bbox = ['-25.5', '25.5', '-30.5', '30.5']
   data = get_lwe_byRange("20020101", "20030101", session)
   date_2 = get_lwe_byRange("20020101", "20030101", session, bbox)
+  return data
+
+if __name__ == "__main__":
+  print(runGRACE())
