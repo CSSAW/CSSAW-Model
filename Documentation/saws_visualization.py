@@ -17,7 +17,7 @@ def reformatDate(date):
     return "{}{}".format(year, month)
 
 @st.cache
-def get_monthly_saws_data(startDate, endDate):
+def get_monthly_saws_data(startDate, endDate, sess):
     """ Returns a pandas df with monthly saws data
         args:
             startDate ---- a string in the YYYYMMDD format for the start of the desired data
@@ -81,9 +81,9 @@ def get_monthly_saws_data(startDate, endDate):
 
     return dataFrame
 
-# Some c
+# creates and returns a geo json out of Limpopo region and the precipiatation data 
 def create_geo_json(date, sess):
-    dataFrame = get_monthly_saws_data(date, date)
+    dataFrame = get_monthly_saws_data(date, date, sess)
     sess.conn.close()
 
 
@@ -119,7 +119,7 @@ if __name__ == "__main__":
     credentials.close()
     
     sess = Session(username,password, host, db='CENTRAL')
-    data = create_geo_json(20120101,sess)
+    data = create_geo_json(20120101, sess)
     
     INITIAL_VIEW_STATE = pydeck.ViewState(Latitudeitude=-24.654950, Longitudeitude=29.3906515, zoom=7, max_zoom=16, pitch=45, bearing=0)
 
