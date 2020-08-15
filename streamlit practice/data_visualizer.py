@@ -89,14 +89,19 @@ def get_monthly_saws_data(startDate, endDate):
 
     return dataFrame
 
+# cache this really slow function to speedup runtime on method calls with same arguments 
+@st.cache
+def slowFunction(arg1, arg2, arg3):
+   time.sleep(10)
+   return int(arg1) * int(arg2) * int(arg3)
+
 
 if __name__ == "__main__":
     st.title('Data Visualization')
 
     st.write("Use the side bar to select different dates")
 
-    # months is used to convert any month name or number to correct formatting
-    monthConvert = {
+    months = {
         "January": "01",
         "Febrauary": "02",
         "March": "03",
@@ -108,63 +113,26 @@ if __name__ == "__main__":
         "September": "09",
         "October": "10",
         "November": "11",
-        "December": "12",
-        "1": "01",
-        "2": "02",
-        "3": "03",
-        "4": "04",
-        "5": "05",
-        "6": "06",
-        "7": "07",
-        "8": "08",
-        "9": "09",
-        "10": "10",
-        "11": "11",
-        "12": "12",
+        "December": "12"
     }
-    monthOptions = [
-        "January",
-        "Febrauary",
-        "March",
-        "April",
-        "May",
-        "June",
-        "July",
-        "August",
-        "September",
-        "October",
-        "November",
-        "December",
-    ]
     years = ["2012", "2013", "2014", "2015", "2016", "2017", "2018", "2019", "2020"]
 
-    startMonth = st.sidebar.selectbox("Pick a startMonth", monthOptions)
-    startYear = st.sidebar.selectbox("Pick a year:", years)
+    month = st.sidebar.selectbox("Pick a month", list(months.keys()))
+    year = st.sidebar.selectbox("Pick a year:", years)
 
-    numMonths = st.sidebar.slider("Specify the number of months of data to look at", 1, 5, 1, 1)
+    "You selected: ", month, year
 
-    "You selected: ", startMonth, startYear, numMonths
-
-    startDate = "{}{}01".format(startYear, monthConvert[startMonth])
-    
+    startDate = "{}{}01".format(year, months[month])
+    # use 1 month for testing
     endDate = startDate
-    currentMonth = int(monthConvert[startMonth])
-    currentYear = int(startYear)
-
-    for i in range(numMonths - 1):
-        currentMonth += 1
-        if currentMonth == 13:
-            currentYear += 1
-            currentMonth = 1
-            
-        if currentYear == 2020 and currentMonth <= 7:
-            endDate = "{}{}01".format(currentYear, monthConvert[str(currentMonth)])
-        elif currentYear <= 2019:
-            endDate = "{}{}01".format(currentYear, monthConvert[str(currentMonth)])
-
-    st.write(endDate)
 
     # use getter method to get data from database for selected date
-    df = get_monthly_saws_data(startDate, endDate)
+    df = get_monthly_saws_data(startDate,endDate)
     
+    # df = pd.DataFrame({
+    # 'Date': ['3-1-2012', '3-1-2012', '3-1-2012', '3-1-2012'],
+    # 'Latitude': [25.32, 25.36, 25.32, 25.36],
+    # 'Longitude': [27.3, 27.3, 28.1, 28.1],
+    # 'Precipitation': [0.002, 0.32, 0.091, 0.672]
+    # })
     st.write(df.head())

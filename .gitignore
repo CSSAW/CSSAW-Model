@@ -1,3 +1,8 @@
+key.txt
+/.vscode/
 credentials.txt
 *.sql
-key.txt
+.DS_Store
+.gitignore
+__pycache__/
+Documentation/geojson_layer.html
