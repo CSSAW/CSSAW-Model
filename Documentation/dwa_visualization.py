@@ -7,8 +7,8 @@ import pandas as pd
 # Some c
 def create_geo_json(date, sess):
 
-    tableName = '`dwa-primary`'
-    query = "SELECT * from Test." + tableName \
+    tableName = '`dwa_primary`'
+    query = "SELECT * from CENTRAL." + tableName \
          + " WHERE `DATE` > " + (str)(date) \
          + " AND `DATE` <= " + (str)(date + 31) 
          
@@ -16,7 +16,7 @@ def create_geo_json(date, sess):
     dataFrame = dataFrame.drop("TIME", axis='columns')
     dataFrame = dataFrame.drop("QUA", axis='columns')
     dataFrame = dataFrame.drop("QUA.1", axis='columns')
-    dataFrame = dataFrame.drop("id", axis='columns')
+
     sess.conn.close()
 
     # dataFrame = dataFrame.drop("date", axis='columns')
@@ -56,8 +56,8 @@ if __name__ == "__main__":
     mapbox_api_key = credentials.readline().replace('\n','')
     credentials.close()
     
-    sess = Session(username,password, host, db='Test')
-    data = create_geo_json(19660100,sess)
+    sess = Session(username,password, host, db='CENTRAL')
+    data = create_geo_json(19900100,sess)
     
     INITIAL_VIEW_STATE = pydeck.ViewState(latitude=-24.654950, longitude=29.3906515, zoom=7, max_zoom=16, pitch=45, bearing=0)
 
@@ -69,7 +69,7 @@ if __name__ == "__main__":
         filled=True,
         extruded=True,
         wireframe=True,
-        get_elevation="elevation*1500000",
+        get_elevation="elevation*150000",
         get_radius=1000, 
         get_fill_color="[255 ,100, normalizedElevation * 255, 255]", 
         get_line_color=[255, 255, 255],
