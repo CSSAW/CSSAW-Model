@@ -76,6 +76,6 @@ if __name__ == "__main__":
     )
 
 
-    r = pydeck.Deck(layers=[ geojson], initial_view_state=INITIAL_VIEW_STATE)
+    r = pydeck.Deck(mapbox_key=mapbox_api_key, layers=[ geojson], initial_view_state=INITIAL_VIEW_STATE)
 
     r.to_html("geojson_layer.html")

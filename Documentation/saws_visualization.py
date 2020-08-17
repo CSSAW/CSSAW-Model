@@ -86,15 +86,6 @@ def create_geo_json(date, sess):
     dataFrame = get_monthly_saws_data(date, date, sess)
     sess.conn.close()
 
-
-    # normalized_data = dataFrame["Rainfall (mm)"]
-    # # print(normalized_df.head())
-
-    # # min_max_scaler = preprocessing.MinMaxScaler()
-    # # normalized_data = min_max_scaler.fit_transform(normalized_data.reshape())
-    # print(pd.DataFrame(dataFrame["Rainfall (mm)"]).max() - pd.DataFrame(dataFrame["Rainfall (mm)"]).min() )
-    # dataFrame["normalizedCor"] = pd.DataFrame(dataFrame["Rainfall (mm)"]).apply(lambda x: (x-x.min())/(x.max()-x.min()))
-
     print(dataFrame.head())
     # normalized_df=(normalized_df-normalized_df.min())/(normalized_df.max()-normalized_df.min())
     polygonSize = 0.02/2
@@ -118,10 +109,10 @@ if __name__ == "__main__":
     mapbox_api_key = credentials.readline().replace('\n','')
     credentials.close()
     
-    sess = Session(username,password, host, db='CENTRAL')
+    sess = Session(username, password, host, db='CENTRAL')
     data = create_geo_json(20120101, sess)
     
-    INITIAL_VIEW_STATE = pydeck.ViewState(Latitudeitude=-24.654950, Longitudeitude=29.3906515, zoom=7, max_zoom=16, pitch=45, bearing=0)
+    INITIAL_VIEW_STATE = pydeck.ViewState(Latitude=-24.654950, Longitude=29.3906515, zoom=7, max_zoom=16, pitch=45, bearing=0)
 
     geojson = pydeck.Layer(
         "GeoJsonLayer",
@@ -138,49 +129,7 @@ if __name__ == "__main__":
     )
 
 
-    r = pydeck.Deck(layers=[ geojson], initial_view_state=INITIAL_VIEW_STATE)
+    r = pydeck.Deck(mapbox_key=mapbox_api_key, layers=[ geojson], initial_view_state=INITIAL_VIEW_STATE)
 
     r.to_html("saws_geojson_layer.html")
 
-
-
-# if __name__ == "__main__":
-#     st.title('Data Visualization')
-
-#     st.write("Use the side bar to select different dates")
-
-#     months = {
-#         "January": "01",
-#         "Febrauary": "02",
-#         "March": "03",
-#         "April": "04",
-#         "May": "05",
-#         "June": "06",
-#         "July": "07",
-#         "August": "08",
-#         "September": "09",
-#         "October": "10",
-#         "November": "11",
-#         "December": "12"
-#     }
-#     years = ["2012", "2013", "2014", "2015", "2016", "2017", "2018", "2019", "2020"]
-
-#     month = st.sidebar.selectbox("Pick a month", list(months.keys()))
-#     year = st.sidebar.selectbox("Pick a year:", years)
-
-#     "You selected: ", month, year
-
-#     startDate = "{}{}01".format(year, months[month])
-#     # use 1 month for testing
-#     endDate = startDate
-
-#     # use getter method to get data from database for selected date
-#     df = get_monthly_saws_data(startDate,endDate)
-    
-#     # df = pd.DataFrame({
-#     # 'Date': ['3-1-2012', '3-1-2012', '3-1-2012', '3-1-2012'],
-#     # 'Latitudeitude': [25.32, 25.36, 25.32, 25.36],
-#     # 'Longitude': [27.3, 27.3, 28.1, 28.1],
-#     # 'Precipitation': [0.002, 0.32, 0.091, 0.672]
-#     # })
-#     st.write(df.head())
