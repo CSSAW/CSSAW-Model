@@ -16,7 +16,6 @@ def reformatDate(date):
     
     return "{}{}".format(year, month)
 
-@st.cache
 def get_monthly_saws_data(startDate, endDate, sess):
     """ Returns a pandas df with monthly saws data
         args:
@@ -93,7 +92,11 @@ def create_geo_json(date, sess):
     # print(normalized_df.head())
     for index,row in dataFrame.iterrows():
         # feature = Feature(geometry=Point((row['long'], row['Latitude'])), properties={"elevation":row["Rainfall (mm)"]})
-        feature = Feature(geometry=Polygon([[[row['Longitude']-polygonSize, row['Latitude']-polygonSize],[row['Longitude']-polygonSize, row['Latitude']+polygonSize],[row['Longitude']+polygonSize, row['Latitude']+polygonSize],[row['Longitude']+polygonSize, row['Latitude']-polygonSize]]]), 
+       # Polygon()
+
+        #Polygon([[[row['Longitude']-polygonSize, row['Latitude']-polygonSize],[row['Longitude']-polygonSize, row['Latitude']+polygonSize],[row['Longitude']+polygonSize, row['Latitude']+polygonSize],[row['Longitude']+polygonSize, row['Latitude']-polygonSize], [row['Longitude']-polygonSize, row['Latitude']-polygonSize]]])
+
+        feature = Feature(geometry=Polygon([[ [29.39, 24.65], [29.59, 24.85], [29.79, 25.05], [29.99, 25.25], [29.39, 24.65] ]]), 
         properties={"elevation": row["Rainfall (mm)"], "normalizedElevation": row["Rainfall (mm)"]
         })
         geoJsonList.append(feature)
@@ -110,7 +113,7 @@ if __name__ == "__main__":
     credentials.close()
     
     sess = Session(username, password, host, db='CENTRAL')
-    data = create_geo_json(20120101, sess)
+    data = create_geo_json("20120101", sess)
     
     INITIAL_VIEW_STATE = pydeck.ViewState(Latitude=-24.654950, Longitude=29.3906515, zoom=7, max_zoom=16, pitch=45, bearing=0)
 
