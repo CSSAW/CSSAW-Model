@@ -88,18 +88,15 @@ def create_geo_json(date, sess):
     print(dataFrame.head())
     # normalized_df=(normalized_df-normalized_df.min())/(normalized_df.max()-normalized_df.min())
     polygonSize = 0.02/2
+   #  polygonSize = 0.07
     geoJsonList = []
-    # print(normalized_df.head())
+    
     for index,row in dataFrame.iterrows():
-        # feature = Feature(geometry=Point((row['long'], row['Latitude'])), properties={"elevation":row["Rainfall (mm)"]})
-       # Polygon()
-
-        #Polygon([[[row['Longitude']-polygonSize, row['Latitude']-polygonSize],[row['Longitude']-polygonSize, row['Latitude']+polygonSize],[row['Longitude']+polygonSize, row['Latitude']+polygonSize],[row['Longitude']+polygonSize, row['Latitude']-polygonSize], [row['Longitude']-polygonSize, row['Latitude']-polygonSize]]])
-
-        feature = Feature(geometry=Polygon([[ [29.39, 24.65], [29.59, 24.85], [29.79, 25.05], [29.99, 25.25], [29.39, 24.65] ]]), 
+        feature = Feature(geometry=Polygon([[[row['Longitude']-polygonSize, -1* row['Latitude']-polygonSize],[row['Longitude']-polygonSize, -1* row['Latitude']+polygonSize],[row['Longitude']+polygonSize, -1* row['Latitude']+polygonSize],[row['Longitude']+polygonSize, -1* row['Latitude']-polygonSize], [row['Longitude']-polygonSize, -1* row['Latitude']-polygonSize]]]),
         properties={"elevation": row["Rainfall (mm)"], "normalizedElevation": row["Rainfall (mm)"]
         })
         geoJsonList.append(feature)
+
 
     featureCollection = FeatureCollection(geoJsonList)
     return featureCollection
@@ -115,11 +112,11 @@ if __name__ == "__main__":
     sess = Session(username, password, host, db='CENTRAL')
     data = create_geo_json("20120101", sess)
     
-    INITIAL_VIEW_STATE = pydeck.ViewState(Latitude=-24.654950, Longitude=29.3906515, zoom=7, max_zoom=16, pitch=45, bearing=0)
-
+    INITIAL_VIEW_STATE = pydeck.ViewState(latitude=-24.654950, longitude=29.3906515, zoom=7, max_zoom=16, pitch=45, bearing=0)
+    
     geojson = pydeck.Layer(
         "GeoJsonLayer",
-        data = data,
+        data=data,
         opacity=0.8,
         stroked=False,
         filled=True,
@@ -131,8 +128,9 @@ if __name__ == "__main__":
         get_line_color=[255, 255, 255],
     )
 
+# add get_weight to layer???????
 
-    r = pydeck.Deck(mapbox_key=mapbox_api_key, layers=[ geojson], initial_view_state=INITIAL_VIEW_STATE)
+    r = pydeck.Deck(mapbox_key=mapbox_api_key, layers=[geojson], initial_view_state=INITIAL_VIEW_STATE)
 
     r.to_html("saws_geojson_layer.html")
 
