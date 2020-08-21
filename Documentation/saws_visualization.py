@@ -90,11 +90,15 @@ def create_geo_json(date, sess):
     polygonSize = 0.02/2
    #  polygonSize = 0.07
     geoJsonList = []
-    
+    # latitude is y coord
+    # longitude is x coord
+
+    # width = dataFrame[0]["Longitude"] - dataFrame[1][""]
+
     for index,row in dataFrame.iterrows():
         feature = Feature(geometry=Polygon([[[row['Longitude']-polygonSize, -1* row['Latitude']-polygonSize],[row['Longitude']-polygonSize, -1* row['Latitude']+polygonSize],[row['Longitude']+polygonSize, -1* row['Latitude']+polygonSize],[row['Longitude']+polygonSize, -1* row['Latitude']-polygonSize], [row['Longitude']-polygonSize, -1* row['Latitude']-polygonSize]]]),
-        properties={"elevation": row["Rainfall (mm)"], "normalizedElevation": row["Rainfall (mm)"]
-        })
+        properties={"elevation": row["Rainfall (mm)"]*490, "normalizedElevation": row["Rainfall (mm)"], "Longitude": row["Longitude"], "Latitude": -1*row["Latitude"]}
+        )
         geoJsonList.append(feature)
 
 
@@ -122,15 +126,14 @@ if __name__ == "__main__":
         filled=True,
         extruded=True,
         wireframe=True,
-        get_elevation="elevation*1500000",
+        pickable=True,
+        get_elevation="normalizedElevation*1500000",
         get_radius=1000, 
         get_fill_color="[255 ,100, normalizedElevation * 255, 255]", 
         get_line_color=[255, 255, 255],
     )
 
-# add get_weight to layer???????
-
-    r = pydeck.Deck(mapbox_key=mapbox_api_key, layers=[geojson], initial_view_state=INITIAL_VIEW_STATE)
+    r = pydeck.Deck(mapbox_key=mapbox_api_key, layers=[geojson], initial_view_state=INITIAL_VIEW_STATE, tooltip={"text":  "Latitude: {Latitude}, Longitude: {Longitude}, Rainfall(mm): {elevation}"})
 
     r.to_html("saws_geojson_layer.html")
 
