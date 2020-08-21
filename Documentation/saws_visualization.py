@@ -94,9 +94,38 @@ def create_geo_json(date, sess):
     # longitude is x coord
 
     # width = dataFrame[0]["Longitude"] - dataFrame[1][""]
+    lat1, lat2, long1, long2 = None, None, None, None
 
     for index,row in dataFrame.iterrows():
-        feature = Feature(geometry=Polygon([[[row['Longitude']-polygonSize, -1* row['Latitude']-polygonSize],[row['Longitude']-polygonSize, -1* row['Latitude']+polygonSize],[row['Longitude']+polygonSize, -1* row['Latitude']+polygonSize],[row['Longitude']+polygonSize, -1* row['Latitude']-polygonSize], [row['Longitude']-polygonSize, -1* row['Latitude']-polygonSize]]]),
+        if index == 0:
+            lat1 = row["Latitude"]
+            long1 = row["Longitude"]
+        
+        if lat2 == None and row["Latitude"] != lat1:
+            lat2 = row["Latitude"]
+
+        if long2 == None and row["Longitude"] != long1:
+            long2 = row["Longitude"]
+
+        # break when all requested coordinates are filled
+        if long1 != None and long2 != None and lat1 != None and lat2 != None:
+            break
+    
+    print("Lat1: {}  Lat2: {}  Long1: {}  Long2: {}".format(lat1, lat2, long1, long2))
+
+    polyWidth = 0.017
+    polyHeight = 0.017
+    if long1 != None and long2 != None and lat1 != None and lat2 != None:
+        polyWidth = (abs(long1 - long2) / 2.0) - 0.001
+        polyHeight = (abs(lat1 - lat2) / 2.0) - 0.001
+
+    # for index,row in dataFrame.iterrows():
+    #     feature = Feature(geometry=Polygon([[[row['Longitude']-polygonSize, -1* row['Latitude']-polygonSize],[row['Longitude']-polygonSize, -1* row['Latitude']+polygonSize],[row['Longitude']+polygonSize, -1* row['Latitude']+polygonSize],[row['Longitude']+polygonSize, -1* row['Latitude']-polygonSize], [row['Longitude']-polygonSize, -1* row['Latitude']-polygonSize]]]),
+    #     properties={"elevation": row["Rainfall (mm)"]*490, "normalizedElevation": row["Rainfall (mm)"], "Longitude": row["Longitude"], "Latitude": -1*row["Latitude"]}
+    #     )
+    #     geoJsonList.append(feature)
+    for index,row in dataFrame.iterrows():
+        feature = Feature(geometry=Polygon([[[row['Longitude']-polyWidth, -1* row['Latitude']-polyHeight],[row['Longitude']-polyWidth, -1* row['Latitude']+polyHeight],[row['Longitude']+polyWidth, -1* row['Latitude']+polyHeight],[row['Longitude']+polyWidth, -1* row['Latitude']-polyHeight], [row['Longitude']-polyWidth, -1* row['Latitude']-polyHeight]]]),
         properties={"elevation": row["Rainfall (mm)"]*490, "normalizedElevation": row["Rainfall (mm)"], "Longitude": row["Longitude"], "Latitude": -1*row["Latitude"]}
         )
         geoJsonList.append(feature)
