@@ -1,11 +1,8 @@
 import pydeck
 from geojson import Feature, Point, FeatureCollection, Polygon
 from cssaw_central.Session import Session
-
-from sklearn import preprocessing
 import pandas as pd
 import numpy as np
-import streamlit as st
 
 # method that takes a date in as an argument and reformats it to remove the day
 def reformatDate(date):
@@ -82,59 +79,62 @@ def get_monthly_saws_data(startDate, endDate, sess):
 
 # creates and returns a geo json out of Limpopo region and the precipiatation data 
 def create_geo_json(date, sess):
+    # get the precipitation data from db then close the connection
     dataFrame = get_monthly_saws_data(date, date, sess)
     sess.conn.close()
 
-    print(dataFrame.head())
-    # normalized_df=(normalized_df-normalized_df.min())/(normalized_df.max()-normalized_df.min())
-    polygonSize = 0.02/2
-   #  polygonSize = 0.07
+    # FOR DEBUGGING ONLY
+    # print(dataFrame.head())
+
     geoJsonList = []
+
     # latitude is y coord
     # longitude is x coord
-
-    # width = dataFrame[0]["Longitude"] - dataFrame[1][""]
     lat1, lat2, long1, long2 = None, None, None, None
 
+    # loop through all rows in the dataframe
     for index,row in dataFrame.iterrows():
+        # set the initial longitude and latitude
         if index == 0:
             lat1 = row["Latitude"]
             long1 = row["Longitude"]
         
+        # if the 2nd latitude hasn't been set and the current entry is different than the inital latitude
         if lat2 == None and row["Latitude"] != lat1:
-            lat2 = row["Latitude"]
+            lat2 = row["Latitude"] 
 
+        # if the 2nd longitude hasn't been set and the current entry is different than the inital longitude
         if long2 == None and row["Longitude"] != long1:
             long2 = row["Longitude"]
 
         # break when all requested coordinates are filled
         if long1 != None and long2 != None and lat1 != None and lat2 != None:
             break
-    
-    print("Lat1: {}  Lat2: {}  Long1: {}  Long2: {}".format(lat1, lat2, long1, long2))
 
+    # default values
     polyWidth = 0.017
     polyHeight = 0.017
+    # as long as no coordinates are none, try to calculate width and height of polygons accurately
     if long1 != None and long2 != None and lat1 != None and lat2 != None:
+        # subtract 0.001 for slight spacing between data points
         polyWidth = (abs(long1 - long2) / 2.0) - 0.001
         polyHeight = (abs(lat1 - lat2) / 2.0) - 0.001
 
-    # for index,row in dataFrame.iterrows():
-    #     feature = Feature(geometry=Polygon([[[row['Longitude']-polygonSize, -1* row['Latitude']-polygonSize],[row['Longitude']-polygonSize, -1* row['Latitude']+polygonSize],[row['Longitude']+polygonSize, -1* row['Latitude']+polygonSize],[row['Longitude']+polygonSize, -1* row['Latitude']-polygonSize], [row['Longitude']-polygonSize, -1* row['Latitude']-polygonSize]]]),
-    #     properties={"elevation": row["Rainfall (mm)"]*490, "normalizedElevation": row["Rainfall (mm)"], "Longitude": row["Longitude"], "Latitude": -1*row["Latitude"]}
-    #     )
-    #     geoJsonList.append(feature)
+    # loop through all rows in the dataframe
     for index,row in dataFrame.iterrows():
+        # create a feature using the current latitude, longitude, precipitation, and the poly width and height
         feature = Feature(geometry=Polygon([[[row['Longitude']-polyWidth, -1* row['Latitude']-polyHeight],[row['Longitude']-polyWidth, -1* row['Latitude']+polyHeight],[row['Longitude']+polyWidth, -1* row['Latitude']+polyHeight],[row['Longitude']+polyWidth, -1* row['Latitude']-polyHeight], [row['Longitude']-polyWidth, -1* row['Latitude']-polyHeight]]]),
         properties={"elevation": row["Rainfall (mm)"]*490, "normalizedElevation": row["Rainfall (mm)"], "Longitude": row["Longitude"], "Latitude": -1*row["Latitude"]}
         )
+        # append the feature to the geoJson list
         geoJsonList.append(feature)
 
-
+    # make a feature collection out of the geoJson list
     featureCollection = FeatureCollection(geoJsonList)
     return featureCollection
 
 if __name__ == "__main__":
+    # open credentials file, store values of all the credentials, then close the file
     credentials = open('../credentials.txt', 'r')
     username = credentials.readline().replace('\n','')
     password = credentials.readline().replace('\n','')
@@ -142,6 +142,7 @@ if __name__ == "__main__":
     mapbox_api_key = credentials.readline().replace('\n','')
     credentials.close()
     
+    # create a new connection to the database and try to create a geoJson data layer
     sess = Session(username, password, host, db='CENTRAL')
     data = create_geo_json("20120101", sess)
     
